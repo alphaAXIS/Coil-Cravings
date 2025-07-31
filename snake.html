@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coil Cravings</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <canvas id="particleCanvas"></canvas>
+    <div class="language-selector">
+        <select id="languageSelect" onchange="changeLanguage(this.value)">
+            <option value="en">English</option>
+            <option value="zh-CN">中文</option>
+            <option value="ja">日本語</option>
+            <option value="ko">한국어</option>
+            <option value="fr">Français</option>
+            <option value="de">Deutsch</option>
+            <option value="es">Español</option>
+            <option value="ru">Русский</option>
+        </select>
+    </div>
+    <button class="logout-btn" id="logoutBtn" style="display: none;">
+        <i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span>
+    </button>
+
+    <div class="auth-screen" id="authScreen">
+        <h1 class="screen-title" data-i18n="gameTitle">Coil Cravings</h1>
+        <p data-i18n="creator">Created by alphaAXIS © 2025</p>
+        <button class="help-btn">
+            <i class="fas fa-question"></i>
+        </button>
+        <div class="form-group">
+            <label for="authUsername" data-i18n="username">Username</label>
+            <input type="text" id="authUsername" class="form-control" placeholder="Enter username" data-i18n-placeholder="enterUsername">
+            <div class="error-message" id="usernameError">
+                <i class="fas fa-exclamation-circle"></i>
+                <span></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="authPassword" data-i18n="password">Password</label>
+            <input type="password" id="authPassword" class="form-control" placeholder="Enter password" data-i18n-placeholder="enterPassword">
+            <div class="error-message" id="passwordError">
+                <i class="fas fa-exclamation-circle"></i>
+                <span></span>
+            </div>
+        </div>
+        <div class="form-group" id="confirmPasswordGroup" style="display: none;">
+            <label for="confirmPassword" data-i18n="confirmPassword">Confirm Password</label>
+            <input type="password" id="confirmPassword" class="form-control" placeholder="Confirm password" data-i18n-placeholder="confirmPasswordPlaceholder">
+            <div class="error-message" id="confirmPasswordError">
+                <i class="fas fa-exclamation-circle"></i>
+                <span></span>
+            </div>
+        </div>
+        <div class="auth-actions">
+            <button class="btn" onclick="handleAuthAction()" data-i18n="login">Login</button>
+            <button class="btn btn-secondary" onclick="guestMode()" data-i18n="guestMode">Guest Mode</button>
+        </div>
+        <div class="auth-toggle-link" id="authModeToggle" onclick="toggleAuthMode()">
+            <i class="fas fa-user-plus"></i> <span data-i18n="noAccount">Don't have an account? Register</span>
+        </div>
+    </div>
+
+    <div class="start-screen" id="startScreen" style="display: none;">
+        <button class="help-btn">
+            <i class="fas fa-question"></i>
+        </button>
+        <h1 class="screen-title" data-i18n="welcomeBack">Welcome back, <span id="welcomeUsername"></span></h1>
+        <div class="user-level">
+            <div class="level-title">
+                <span data-i18n="currentLevel">Current Level</span>
+                <span class="level-badge" data-i18n="levelBadge">Lv.<span id="userLevel">1</span></span>
+            </div>
+            <div class="level-progress">
+                <div class="level-progress-bar" id="levelProgressBar"></div>
+            </div>
+            <div class="level-progress-text" id="levelProgressText" data-i18n="expProgress">0/100 XP</div>
+        </div>
+        <div class="speed-control">
+            <label data-i18n="initialSpeed">Initial Speed:</label>
+            <div class="slider-container">
+                <div class="slider-track"></div>
+                <div class="slider-progress" id="speedProgress"></div>
+                <div class="slider-thumb" id="speedThumb"></div>
+            </div>
+            <span class="speed-value" id="speedValue">100%</span>
+            <input type="range" id="speedSlider" min="20" max="500" value="100"
+                   style="display: none;" oninput="updateSpeedDisplay()">
+        </div>
+        <div class="form-group">
+            <button class="btn" onclick="startGame()">
+                <i class="fas fa-gamepad"></i> <span data-i18n="startGame">Start Game</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="guest-screen" id="guestScreen" style="display: none;">
+        <button class="help-btn">
+            <i class="fas fa-question"></i>
+        </button>
+        <h1 class="screen-title" data-i18n="graySnake">Coil Cravings</h1>
+        <p class="simple-message" data-i18n="guestDescription">
+            In guest mode, you can experience basic game features.<br>
+            Register an account to save game records and progress.
+        </p>
+        <div class="speed-control">
+            <label data-i18n="initialSpeed">Initial Speed:</label>
+            <div class="slider-container">
+                <div class="slider-track"></div>
+                <div class="slider-progress" id="guestSpeedProgress"></div>
+                <div class="slider-thumb" id="guestSpeedThumb"></div>
+            </div>
+            <span class="speed-value" id="guestSpeedValue">100%</span>
+            <input type="range" id="guestSpeedSlider" min="20" max="500" value="100"
+                   style="display: none;" oninput="updateGuestSpeedDisplay()">
+        </div>
+        <div class="form-group">
+            <button class="btn" onclick="startGuestGame()">
+                <i class="fas fa-gamepad"></i> <span data-i18n="startGame">Start Game</span>
+            </button>
+        </div>
+        <div class="switch-to-login">
+            <span data-i18n="haveAccount">Already have an account?</span><span class="switch-link" onclick="switchToLogin()" data-i18n="clickToLogin">Click to login</span>
+        </div>
+    </div>
+
+    <div class="help-panel" id="helpPanel">
+        <button class="close-help">
+            <i class="fas fa-times"></i>
+        </button>
+        <h2 data-i18n="gameControls">Game Controls</h2>
+        <p data-i18n="directionControl">Direction Control:</p>
+        <ul>
+            <li><strong data-i18n="keyW">W</strong> <span data-i18n="or">or</span> <strong>↑</strong>: <span data-i18n="moveUp">Move Up</span></li>
+            <li><strong data-i18n="keyS">S</strong> <span data-i18n="or">or</span> <strong>↓</strong>: <span data-i18n="moveDown">Move Down</span></li>
+            <li><strong data-i18n="keyA">A</strong> <span data-i18n="or">or</span> <strong>←</strong>: <span data-i18n="moveLeft">Move Left</span></li>
+            <li><strong data-i18n="keyD">D</strong> <span data-i18n="or">or</span> <strong>→</strong>: <span data-i18n="moveRight">Move Right</span></li>
+        </ul>
+        <p data-i18n="shortcuts">Shortcuts:</p>
+        <ul>
+            <li><strong data-i18n="keyR">R</strong>: <span data-i18n="restart">Restart Game</span></li>
+        </ul>
+        <p data-i18n="gameGoal">Game Goal: Control the snake to eat food and get high scores!</p>
+    </div>
+
+    <div class="game-container" id="gameContainer">
+        <div class="user-level">
+            <div class="level-title">
+                <span data-i18n="currentLevel">Current Level</span>
+                <span class="level-badge" data-i18n="levelBadge">Lv.<span id="inGameLevel">1</span></span>
+            </div>
+            <div class="level-progress">
+                <div class="level-progress-bar" id="inGameLevelProgressBar"></div>
+            </div>
+        </div>
+        <canvas id="gameCanvas" width="300" height="300"></canvas>
+        <div class="stats" id="stats">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label" data-i18n="keyPresses">Key Presses</div>
+                    <div class="stat-value">
+                        <i class="fas fa-keyboard"></i>
+                        <span id="keyCount">0</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label" data-i18n="totalScore">Total Score</div>
+                    <div class="stat-value">
+                        <i class="fas fa-star"></i>
+                        <span id="score">0</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label" data-i18n="scoreKeyRatio">Score/Key Ratio</div>
+                    <div class="stat-value">
+                        <i class="fas fa-percentage"></i>
+                        <span id="scoreRatio">0%</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label" data-i18n="survivalTime">Survival Time</div>
+                    <div class="stat-value">
+                        <i class="fas fa-clock"></i>
+                        <span id="survivalTime">0.00s</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label" data-i18n="currentSpeed">Current Speed</div>
+                    <div class="stat-value">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span id="currentSpeed">100%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="game-over-screen" id="gameOverScreen">
+        <h1 data-i18n="gameOver">Game Over</h1>
+        <div class="game-over-stats">
+            <div class="game-over-stat">
+                <div class="game-over-stat-label" data-i18n="expGained">XP Gained</div>
+                <div class="game-over-stat-value highlight" id="expGained">0</div>
+            </div>
+            <div class="game-over-stat">
+                <div class="game-over-stat-label" data-i18n="finalScore">Final Score</div>
+                <div class="game-over-stat-value" id="finalScore">0</div>
+            </div>
+            <div class="game-over-stat">
+                <div class="game-over-stat-label" data-i18n="finalKeyCount">Key Presses</div>
+                <div class="game-over-stat-value" id="finalKeyCount">0</div>
+            </div>
+            <div class="game-over-stat">
+                <div class="game-over-stat-label" data-i18n="finalScoreRatio">Score/Key Ratio</div>
+                <div class="game-over-stat-value" id="finalScoreRatio">0%</div>
+            </div>
+            <div class="game-over-stat">
+                <div class="game-over-stat-label" data-i18n="finalSurvivalTime">Survival Time</div>
+                <div class="game-over-stat-value" id="finalSurvivalTime">0.00s</div>
+            </div>
+            <div class="game-over-stat">
+                <div class="game-over-stat-label" data-i18n="finalSpeed">Final Speed</div>
+                <div class="game-over-stat-value" id="finalSpeed">100%</div>
+            </div>
+            <div class="game-over-stat">
+                <div class="game-over-stat-label" data-i18n="finalPerformance">Performance</div>
+                <div class="game-over-stat-value highlight" id="finalPerformance">0</div>
+            </div>
+            <div class="game-over-stat">
+                <div class="game-over-stat-label" data-i18n="finalLevel">Current Level</div>
+                <div class="game-over-stat-value" id="finalLevel">1</div>
+            </div>
+        </div>
+
+        <div class="average-performance">
+            <p data-i18n="averagePerformance">Average Performance: <span class="highlight" id="averagePerformance">0</span></p>
+            <p data-i18n="highestPerformance">Best Performance: <span class="highlight" id="highestPerformance">0</span></p>
+        </div>
+
+        <div class="game-over-actions">
+            <button class="btn" onclick="restartGame()">
+                <i class="fas fa-redo"></i> <span data-i18n="restart">Restart</span>
+            </button>
+            <button class="btn btn-secondary" onclick="returnToStart()">
+                <i class="fas fa-home"></i> <span data-i18n="returnToMain">Main Menu</span>
+            </button>
+        </div>
+
+        <div class="history-section">
+            <h3 data-i18n="historyRecords">History</h3>
+            <div class="history-controls">
+                <label for="sortBy" data-i18n="sortBy">Sort by:</label>
+                <select id="sortBy" onchange="updateHistoryTable()">
+                    <option value="performance" data-i18n="byPerformance">Performance</option>
+                    <option value="date" data-i18n="byDate">Date</option>
+                </select>
+            </div>
+            <table class="history-table" id="historyTable">
+                <thead>
+                    <tr>
+                        <th data-i18n="date">Date</th>
+                        <th data-i18n="score">Score</th>
+                        <th data-i18n="keyPresses">Key Presses</th>
+                        <th data-i18n="survivalTime">Survival Time</th>
+                        <th data-i18n="performance">Performance</th>
+                        <th data-i18n="exp">XP Gained</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <button class="clear-history-btn" onclick="clearHistory()">
+                <i class="fas fa-trash-alt"></i> <span data-i18n="clearHistory">Clear History</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="alert-box" id="alertBox">
+        <p id="alertText" data-i18n="newRecord">Congratulations! You set a new record!</p>
+        <button onclick="closeAlert()" data-i18n="confirm">OK</button>
+    </div>
+
+    <div class="level-up-message" id="levelUpMessage" data-i18n="levelUp">Level Up!</div>
+
+    <script src="script.js"></script>
+</body>
+</html>
