@@ -69,7 +69,7 @@ As a learning project, I focused on practicing these frontend technologies:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/coil-cravings.git
+   git clone https://github.com/alphaaxis/coil-cravings.git
    ```
 2. No dependencies required—simply open `snake.html` in a browser to play
 
